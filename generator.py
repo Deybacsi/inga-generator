@@ -79,7 +79,7 @@ def draw_fan():
         ax.plot(th_circ, r_circ, color='black', lw=1.5)
 
     # skála 0-100 tizesével, 50 mindig felül 
-    scale_radius = radius * 1.15  # a legyezőn kívülre
+    scale_radius = radius * 1.2  # a legyezőn kívülre
     scale_values = np.arange(0, 101, 10)
     for value in scale_values:
         angle_deg = start_angle_deg + (value / 100) * total_angle_deg
@@ -144,7 +144,7 @@ belso_slider.config(command=update_belso_label)
 szoveg_row = ttk.Frame(frame)
 szoveg_row.pack(fill=tk.X)
 
-ttk.Label(szoveg_row, text="Szöveg helyzet:").pack(side=tk.LEFT)
+ttk.Label(szoveg_row, text="Szöveg pozíció:").pack(side=tk.LEFT)
 szoveg_helyzet_slider = ttk.Scale(frame, from_=0.1, to=1.0, orient=tk.HORIZONTAL)
 szoveg_helyzet_slider.set(2/3)
 szoveg_helyzet_value_label = ttk.Label(szoveg_row, text=str(int(float(szoveg_helyzet_slider.get()) * 100)) + "%")

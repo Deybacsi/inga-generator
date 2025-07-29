@@ -1,0 +1,2 @@
+# inga-generator
+Ingatábla generátor

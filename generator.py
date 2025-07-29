@@ -58,6 +58,9 @@ def draw_fan():
 
     text_radius = radius * float(szoveg_helyzet_slider.get())
 
+
+    first_szazalek_cikk=int((sections_slider.get()-11) /2)
+
     # feliratok
     for i in range(num_sections):
         # Középre igazított feliratok
@@ -78,15 +81,31 @@ def draw_fan():
         r_circ = radius + szirom_radius * np.sin(circle_theta)
         ax.plot(th_circ, r_circ, color='black', lw=1.5)
 
+        if first_szazalek_cikk <= i <= first_szazalek_cikk + 10:
+            # szirom szöveg
+            szirom_text = "AA"
+            ax.text(angle, radius * 1.2, str((i-first_szazalek_cikk)*10), ha='center', va='center', fontsize=12)
+
+
+
+
     # skála 0-100 tizesével, 50 mindig felül 
     scale_radius = radius * 1.2  # a legyezőn kívülre
-    scale_values = np.arange(0, 101, 10)
+    scale_values = np.arange(0, 101, 10)        
+
+    """
+
     for value in scale_values:
         angle_deg = start_angle_deg + (value / 100) * total_angle_deg
         angle_rad = np.deg2rad(angle_deg)
         x = scale_radius * np.cos(angle_rad)
         y = scale_radius * np.sin(angle_rad)
         ax.text(angle_rad, scale_radius, str(value), ha='center', va='center', fontsize=12)
+    """
+
+
+
+
 
     canvas.draw()
 
@@ -119,7 +138,7 @@ angle_slider.config(command=update_angle_label)
 sections_row = ttk.Frame(frame)
 sections_row.pack(fill=tk.X)
 ttk.Label(sections_row, text="Körcikkek száma:").pack(side=tk.LEFT)
-sections_slider = ttk.Scale(frame, from_=10, to=36, orient=tk.HORIZONTAL)
+sections_slider = ttk.Scale(frame, from_=11, to=36, orient=tk.HORIZONTAL)
 sections_slider.set(10)
 sections_value_label = ttk.Label(sections_row, text=str(int(sections_slider.get())))
 sections_value_label.pack(side=tk.LEFT, padx=5)

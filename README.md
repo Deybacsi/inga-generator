@@ -3,6 +3,8 @@
 
 Ez az alkalmazás egy egyszerű interaktív grafikus eszköz, amellyel egyedi, legyező-szerű ingatábla ábrákat lehet készíteni, testreszabható feliratokkal és beállításokkal.
 
+![Képernyőkép](screenshot.png)
+
 ## Letöltés
 
 [Ezen a linken](https://github.com/Deybacsi/inga-generator/releases/latest) letöltheted a közvetlenül Windowson futtatható változatot. (Inga-generator.exe)

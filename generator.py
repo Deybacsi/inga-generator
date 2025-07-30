@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, font
+import tkinter.filedialog as fd
+
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
@@ -30,6 +32,14 @@ def get_system_fonts():
 
 def update_font_family(event=None):
     draw_fan()
+
+def save_figure():
+    file_path = fd.asksaveasfilename(
+        defaultextension=".png",
+        filetypes=[("PNG kép", "*.png"), ("JPG kép", "*.jpg"),("PDF file", "*.pdf"), ("Minden", "*.*")]
+    )
+    if file_path:
+        fig.savefig(file_path, bbox_inches='tight')
 
 
 
@@ -73,7 +83,6 @@ def draw_fan():
 
     text_radius = radius * float(szoveg_helyzet_slider.get())
 
-
     first_szazalek_cikk=int((sections_slider.get()-11) /2)
 
     # feliratok
@@ -104,7 +113,9 @@ def draw_fan():
     canvas.draw()
 
 root = tk.Tk()
-root.state('zoomed')
+root.state('zoomed')                # ha linuxon futtatnád, akkor ezt a sort vedd ki
+# root.attributes('-zoomed', True)  # helyette ezt tedd be
+
 root.title("Ingatábla generátor")
 
 frame = ttk.Frame(root)
@@ -199,6 +210,14 @@ labels_text = tk.Text(frame, height=12, width=30)
 labels_text.insert("1.0", "Alma\nKörte\nSzilva\nHúsos barack\nEz egy\\sortörés")
 labels_text.pack(fill=tk.X)
 labels_text.bind("<KeyRelease>", lambda event: draw_fan())
+
+# -------------------
+
+save_row = ttk.Frame(frame)
+save_row.pack(pady=(10, 0))
+save_btn = ttk.Button(save_row, text="Mentés", command=save_figure)
+save_btn.pack(fill=tk.X)
+
 
 fig = plt.Figure(figsize=(5, 5))
 canvas = FigureCanvasTkAgg(fig, master=root)

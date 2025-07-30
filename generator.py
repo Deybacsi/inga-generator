@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, font
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
@@ -21,12 +21,27 @@ def update_szoveg_helyzet_label(val):
     szoveg_helyzet_value_label.config(text=str(int(float(val)*100)) + "%")
     draw_fan()
 
+def update_fontsize_label(val):
+    fontsize_value_label.config(text=str(int(float(val)*100)) + "%")
+    draw_fan()    
+
+def get_system_fonts():
+    return sorted(set(font.families()))
+
+def update_font_family(event=None):
+    draw_fan()
+
+
 
 def draw_fan():
     num_sections = int(sections_slider.get())
     total_angle_deg = int(angle_slider.get())
-    #labels = [x.strip() for x in labels_entry.get().split(",") if x.strip()]
-    labels = [line.strip() for line in labels_text.get("1.0", tk.END).splitlines() if line.strip()]
+
+    labels = [      # sortörések
+        line.strip().replace("\\", "\n")
+        for line in labels_text.get("1.0", tk.END).splitlines()
+        if line.strip()
+    ]
 
     header = header_entry.get()
 
@@ -47,7 +62,7 @@ def draw_fan():
     ax.set_yticklabels([])
     ax.set_xticklabels([])
     ax.grid(False)
-    ax.set_title(header, va='bottom',fontsize=15)
+    ax.set_title(header, va='bottom',fontsize=15, fontname=font_family_var.get())
     fig.subplots_adjust(left=0, right=1, top=0.95, bottom=0.05)  # teljes hely kitöltése
 
 
@@ -70,7 +85,7 @@ def draw_fan():
         rotation = 90 - angle_deg
         if rotation > 90:
             rotation += 180
-        ax.text(angle, text_radius, label, ha='center', va='center', fontsize=10, rotation=rotation, rotation_mode='anchor')
+        ax.text(angle, text_radius, label, ha='center', va='center', fontsize=10*float(fontsize_slider.get()), fontname=font_family_var.get(), rotation=rotation, rotation_mode='anchor')
 
         # szirom alakú körívek
         delta = angles[i + 1] - angles[i]
@@ -84,32 +99,12 @@ def draw_fan():
         if first_szazalek_cikk <= i <= first_szazalek_cikk + 10:
             # szirom szöveg
             szirom_text = "AA"
-            ax.text(angle, radius * 1.2, str((i-first_szazalek_cikk)*10), ha='center', va='center', fontsize=12)
-
-
-
-
-    # skála 0-100 tizesével, 50 mindig felül 
-    scale_radius = radius * 1.2  # a legyezőn kívülre
-    scale_values = np.arange(0, 101, 10)        
-
-    """
-
-    for value in scale_values:
-        angle_deg = start_angle_deg + (value / 100) * total_angle_deg
-        angle_rad = np.deg2rad(angle_deg)
-        x = scale_radius * np.cos(angle_rad)
-        y = scale_radius * np.sin(angle_rad)
-        ax.text(angle_rad, scale_radius, str(value), ha='center', va='center', fontsize=12)
-    """
-
-
-
-
+            ax.text(angle, radius * 1.2 + (float(angle_slider.get())-180)/3000, str((i-first_szazalek_cikk)*10), ha='center', va='center', fontsize=12, fontname=font_family_var.get())
 
     canvas.draw()
 
 root = tk.Tk()
+root.state('zoomed')
 root.title("Ingatábla generátor")
 
 frame = ttk.Frame(root)
@@ -119,6 +114,7 @@ ttk.Label(frame, text="Fejléc:").pack()
 header_entry = ttk.Entry(frame)
 header_entry.insert(0, "Ingatábla")
 header_entry.pack(fill=tk.X)
+header_entry.bind("<KeyRelease>", lambda event: draw_fan())
 
 
 angle_row = ttk.Frame(frame)
@@ -165,7 +161,7 @@ szoveg_row.pack(fill=tk.X)
 
 ttk.Label(szoveg_row, text="Szöveg pozíció:").pack(side=tk.LEFT)
 szoveg_helyzet_slider = ttk.Scale(frame, from_=0.1, to=1.0, orient=tk.HORIZONTAL)
-szoveg_helyzet_slider.set(2/3)
+szoveg_helyzet_slider.set(0.8)
 szoveg_helyzet_value_label = ttk.Label(szoveg_row, text=str(int(float(szoveg_helyzet_slider.get()) * 100)) + "%")
 szoveg_helyzet_value_label.pack(side=tk.LEFT, padx=5)
 szoveg_helyzet_slider.pack(fill=tk.X)
@@ -174,16 +170,35 @@ szoveg_helyzet_slider.config(command=update_szoveg_helyzet_label)
 
 # -------------------
 
+fontsize_row = ttk.Frame(frame)
+fontsize_row.pack(fill=tk.X)
+
+ttk.Label(fontsize_row, text="Betűméret:").pack(side=tk.LEFT)
+fontsize_slider = ttk.Scale(frame, from_=0.5, to=2, orient=tk.HORIZONTAL)
+fontsize_slider.set(1.0)
+fontsize_value_label = ttk.Label(fontsize_row, text=str(int(float(fontsize_slider.get()) * 100)) + "%")
+fontsize_value_label.pack(side=tk.LEFT, padx=5)
+fontsize_slider.pack(fill=tk.X)
+fontsize_slider.config(command=update_fontsize_label)
+
+# -------------------
+
+font_row = ttk.Frame(frame)
+font_row.pack(fill=tk.X)
+ttk.Label(font_row, text="Betűtípus:").pack(side=tk.LEFT)
+font_families = get_system_fonts()
+font_family_var = tk.StringVar(value="Cambria")
+font_combo = ttk.Combobox(font_row, textvariable=font_family_var, values=font_families, state="readonly")
+font_combo.pack(side=tk.LEFT, fill=tk.X, expand=True)
+font_combo.bind("<<ComboboxSelected>>", update_font_family)
+
+# -------------------
 
 ttk.Label(frame, text="Feliratok (soronként):").pack()
 labels_text = tk.Text(frame, height=12, width=30)
-labels_text.insert("1.0", "Alma\nKörte\nSzilva\nNarancs\nHúsos barack")
+labels_text.insert("1.0", "Alma\nKörte\nSzilva\nHúsos barack\nEz egy\\sortörés")
 labels_text.pack(fill=tk.X)
 labels_text.bind("<KeyRelease>", lambda event: draw_fan())
-
-
-
-#ttk.Button(frame, text="Legyező rajzolása", command=draw_fan).pack(pady=10)
 
 fig = plt.Figure(figsize=(5, 5))
 canvas = FigureCanvasTkAgg(fig, master=root)
